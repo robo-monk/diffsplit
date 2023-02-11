@@ -1,9 +1,11 @@
-import { type BaseKvEntityInterface, KVRepository } from "../services/kv.service";
+import { type IEntity, KVRepository, type StoredIEntity } from "../services/kv.service";
+import type { Expense } from "./expense.repository";
+import type { User } from "./user.repository";
 
-type User = any;
-export interface Chain extends BaseKvEntityInterface {
+export interface Chain extends IEntity {
     name: string;
-    users: User[]
+    users: (User & StoredIEntity)[]
+    expenses: Expense[]
 }
 
 export class ChainRepository extends KVRepository<Chain> {}

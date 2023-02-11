@@ -1,7 +1,8 @@
 import { ChainRepository, type Chain } from '$lib/server/repositories/chain.repository';
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from '../../new/$types';
 import { UserRepository } from '$lib/server/repositories/user.repository';
+import { CookieService } from '$lib/server/services/cookies.service';
 // import type { PageServerLoad, Actions } from './$types';
 // import { fail } from '@sveltejs/kit';
 
@@ -21,22 +22,28 @@ export const actions = {
     join: async ({ cookies, request, params }) => {
         const chainRepository = new ChainRepository()
         const userRepository = new UserRepository()
+        const cookieService = new CookieService(cookies)
+
         const data = await request.formData();
         // console.log('-> data', data)
         const chainId = data.get('chainId');
         const username = data.get('username');
+
         if (!username) return fail(400, { missing: 'username' });
         if (!chainId) return fail(400, { missing: 'chainId' });
 
         const updateChain = await chainRepository.mutate(chainId.toString(), (chain) => {
-            // const existingUser = chain.users.find((user) => user.username === username);
+            const existingUser = chain.users.find((user) => user.username === username);
+            // ASK FOR PIN
             // if (existingUser) throw fail(400, { error: 'Username already taken' });
 
-            const user = userRepository.create({
+            const user = existingUser || userRepository.create({
                 username: username.toString(),
-            })
+            });
 
-            chain.users.push(user)
+            cookieService.storeEntity(user, 'user');
+
+            if (!existingUser) chain.users.push(user)
             return chain
         })
         // const chain = chainRepository.create({
@@ -47,8 +54,9 @@ export const actions = {
         console.log('-> chain', updateChain)
 
         await chainRepository.flush()
+        cookieService.storeEntity(updateChain);
 
-        cookies.set(`chain#${updateChain.id}`, JSON.stringify(updateChain));
+        throw redirect(301, `/chain/${updateChain.id}/invite`);
         return { success: true, updateChain };
     }
 } satisfies Actions;

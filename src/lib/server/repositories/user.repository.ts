@@ -1,6 +1,6 @@
-import { KVRepository, type BaseKvEntityInterface } from "../services/kv.service";
+import { KVRepository, type IEntity } from "../services/kv.service";
 
-interface User extends BaseKvEntityInterface {
+export interface User extends IEntity {
     username: string;
 }
 
