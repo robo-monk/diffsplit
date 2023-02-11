@@ -3,11 +3,13 @@
 	// import { createChain } from '../../lib/api';
 	import { Button, TextInput } from 'carbon-components-svelte';
 	import { goto } from '$app/navigation';
+	import type { ActionData } from './$types';
 	// import { TextInput } from 'carbon-components-svelte';
 
 	// export let params;
 
 	let chainId;
+    export let form: ActionData;
 
 	onMount(async () => {
 		// chainId = await createChain();
@@ -19,10 +21,12 @@
 	<span class="text-sm text-gray-500"> New </span>
 	<h1>Expense Chain</h1>
 
-	<div class="my-5">
+	<form method="POST" action="?/createChain">
 		<TextInput labelText="Chain name" placeholder="Fluffy coder" />
-	</div>
-	<Button type="submit">Create</Button>
+		<Button type="submit">Create</Button>
+	</form>
+
+	<div class="my-5" />
 
 	<!-- <Button on:click={() => goto(`/chain/${params.chainId}`)}>Create a chain</Button> -->
 </div>
