@@ -22,7 +22,7 @@
 	<h1>Expense Chain</h1>
 
 	<form method="POST" action="?/createChain">
-		<TextInput labelText="Chain name" placeholder="Fluffy coder" />
+		<TextInput labelText="Chain name" placeholder="Fluffy coder" name="chainName"/>
 		<Button type="submit">Create</Button>
 	</form>
 
