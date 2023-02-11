@@ -6,9 +6,9 @@
 	let numbers = [1,2,3,4,5,6,7,8,9,-1 ,0, -1]
 	let pass: number[] = []
 
-	export let password: string;
+	export let password: string = ''
 
-	$:password = pass.join('')
+	$: if (pass) password = pass.join('')
 	
 	// $: currentPasswordLength = pass.length;
 
@@ -16,9 +16,8 @@
 		if (pass.length == PIN_LEN ) return
 
 		pass = [ ...pass, n];
+		password = pass.join('')
 
-		console.log(pass)
-		console.log(password)
 	}
 
 	
