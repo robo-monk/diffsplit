@@ -2,8 +2,11 @@ import dotenv from 'dotenv';
 import { nanoid } from 'nanoid';
 dotenv.config();
 
-export interface BaseKvEntityInterface {
+export interface StoredBaseKvEntityInterface {
     id: string;
+}
+
+export interface BaseKvEntityInterface {
 }
 
 export class KVEntity<T extends BaseKvEntityInterface> {
@@ -13,9 +16,14 @@ export class KVEntity<T extends BaseKvEntityInterface> {
         return nanoid()
     }
 
-    async put(value: T) {
+    async create(value: T): Promise<T | StoredBaseKvEntityInterface> {
         const key = this.#generateKey();
-        return await this.kv.putRaw(key, JSON.stringify(value));
+        // value.id = key;
+        await this.kv.putRaw(key, JSON.stringify(value));
+        return {
+            id: key,
+            ...value
+        };
     }
 
     async get(key: string): Promise<T | undefined> {
