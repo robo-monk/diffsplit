@@ -5,18 +5,23 @@
 
 	let numbers = [1,2,3,4,5,6,7,8,9,-1 ,0, -1]
 	let pass: number[] = []
-	let currentPasswordLength = 0;
+
+	export let password: string;
+
+	$:password = pass.join('')
 	
 	// $: currentPasswordLength = pass.length;
 
 	function numkeyPress(n: number){
 		if (pass.length == PIN_LEN ) return
 
-		// let key = e.target.id
-		// pass.push(n)
 		pass = [ ...pass, n];
-		console.log(pass)	
+
+		console.log(pass)
+		console.log(password)
 	}
+
+	
 </script>
 
 <div class="flex items-center flex-col max-w-lg mx-auto">
@@ -37,8 +42,12 @@
 
 		{#each numbers as n}
 			<!-- svelte-ignore a11y-click-events-have-key-events -->
-			<div class="numkey w-20 h-20 text-3xl flex items-center justify-center" 
+			{#if n != -1}
+				<div class="numkey w-20 h-20 text-3xl flex items-center justify-center" 
 				on:click={e => numkeyPress(n)}>{n}</div>
+			{:else}
+				<div class="numkey w-20 h-20 text-3xl flex items-center justify-center opacity-0">{n}</div>
+			{/if}
 		{/each}
 	 </div>
 </div>
