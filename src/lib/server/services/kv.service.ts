@@ -11,7 +11,7 @@ export interface BaseKvEntityInterface {
 }
 
 enum InMemoryActions {
-    Create = '_create', Update = '_update', Delete = '_delete'
+    Create = '_create', Update = '_update', Delete = '_delete', Get = '_get'
 }
 export class KVRepository<T extends BaseKvEntityInterface> {
     private readonly kv = new KVService();
@@ -35,6 +35,8 @@ export class KVRepository<T extends BaseKvEntityInterface> {
         return obj
     }
 
+
+
     private async _create(value: T & StoredBaseKvEntityInterface) {
         const res = await this.kv.putRaw(value.id, JSON.stringify(
             omit(value, ['id'])
@@ -47,9 +49,9 @@ export class KVRepository<T extends BaseKvEntityInterface> {
         const entity = await this.get(value.id);
         if (!entity) throw new Error('Entity not found');
         const merged = merge(entity, value);
-        const res = await this.kv.putRaw(value.id, JSON.stringify(merged));
+        const res = await this.kv.putRaw(value.id, JSON.stringify(omit(merged, 'id')));
         if (!res) throw new Error('Failed to update');
-        return value;
+        return merged;
     }
 
     private async _delete(value: T & StoredBaseKvEntityInterface) {
@@ -59,28 +61,47 @@ export class KVRepository<T extends BaseKvEntityInterface> {
         // return value;
     }
 
+    private async _get(value: T & StoredBaseKvEntityInterface) {
+        // throw new Error('Not implemented');
+    }
+
 
 
     update(value: T & StoredBaseKvEntityInterface): T & StoredBaseKvEntityInterface {
-        throw new Error('Not implemented');
+        throw new Error('Not implemented update');
         return {} as T & StoredBaseKvEntityInterface
     }
 
     delete(value: T & StoredBaseKvEntityInterface): T & StoredBaseKvEntityInterface {
-        throw new Error('Not implemented');
+        throw new Error('Not implemented delete');
         return {} as T & StoredBaseKvEntityInterface
     }
 
     async get(key: string): Promise<T | undefined> {
+        const inMemory = this.state.get(InMemoryActions.Get)?.find(v => v.id === key);
+        if (inMemory) return inMemory;
+
         const value = await this.kv.getRaw(key);
         try {
             if (!value) throw new Error('Value is undefined');
-            return JSON.parse(value);
+            const obj = JSON.parse(value);
+            this.pushToState(InMemoryActions.Get, { ...obj, id: key });
+            return obj;
         } catch (e) {
             console.error(e);
             return void 0;
         }
     }
+
+    async mutate(key: string, cb: (value: T) => T) {
+        const value = await this.get(key);
+        if (!value) throw new Error('Value is undefined');
+        const newValue = cb(value);
+        return await this._update({ ...newValue, id: key });
+        // return await this.kv.putRaw(key, JSON.stringify(newValue));
+    }
+
+
 
     async flush() {
         this.state.forEach(async (values, action) => {
@@ -88,6 +109,8 @@ export class KVRepository<T extends BaseKvEntityInterface> {
                 this[action](value);
             })
         })
+
+        this.state.clear();
     }
 }
 

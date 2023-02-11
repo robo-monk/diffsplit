@@ -8,10 +8,16 @@
 
 	// export let params;
 
-	let chainId;
-    export let form: ActionData;
+	let disabled = true;
+	let input: string = '';
+	$: disabled = !input;
+
+	export let form: ActionData;
 
 	onMount(async () => {
+		if (form?.success && form?.chain?.id) {
+			goto(`/chain/${form.chain.id}/join`);
+		}
 		// chainId = await createChain();
 		// goto(`/chain/${chainId}`);
 	});
@@ -22,8 +28,13 @@
 	<h1>Expense Chain</h1>
 
 	<form method="POST" action="?/createChain">
-		<TextInput labelText="Chain name" placeholder="Fluffy coder" name="chainName"/>
-		<Button type="submit">Create</Button>
+		<TextInput
+			labelText="Chain name"
+			placeholder="Fluffy coder"
+			name="chainName"
+			bind:value={input}
+		/>
+		<Button type="submit" {disabled}>Create</Button>
 	</form>
 
 	<div class="my-5" />

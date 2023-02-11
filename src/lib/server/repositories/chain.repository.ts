@@ -1,7 +1,9 @@
 import { type BaseKvEntityInterface, KVRepository } from "../services/kv.service";
 
-interface Chain extends BaseKvEntityInterface {
+type User = any;
+export interface Chain extends BaseKvEntityInterface {
     name: string;
+    users: User[]
 }
 
 export class ChainRepository extends KVRepository<Chain> {}
