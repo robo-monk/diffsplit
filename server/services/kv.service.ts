@@ -1,7 +1,34 @@
 import dotenv from 'dotenv';
-import nanoid from 'nanoid';
-
+import { nanoid } from 'nanoid';
 dotenv.config();
+
+export interface BaseKvEntityInterface {
+    id: string;
+}
+
+export class KVEntity<T extends BaseKvEntityInterface> {
+    private readonly kv = new KVService();
+
+    #generateKey() {
+        return nanoid()
+    }
+
+    async put(value: T) {
+        const key = this.#generateKey();
+        return await this.kv.putRaw(key, JSON.stringify(value));
+    }
+
+    async get(key: string): Promise<T | undefined> {
+        const value = await this.kv.getRaw(key);
+        try {
+            if (!value) throw new Error('Value is undefined');
+            return JSON.parse(value);
+        } catch (e) {
+            console.error(e);
+            return void 0;
+        }
+    }
+}
 
 export class KVService {
     get headers() {
@@ -43,29 +70,6 @@ export class KVService {
 
 }
 
-export class KVEntity<T> {
-    private readonly kv = new KVService();
-
-    #generateKey() {
-        return nanoid()
-    }
-
-    async put(value: T) {
-        const key = this.#generateKey();
-        return await this.kv.putRaw(key, JSON.stringify(value));
-    }
-
-    async get(key: string): Promise<T | undefined> {
-        const value = await this.kv.getRaw(key);
-        try {
-            if (!value) throw new Error('Value is undefined');
-            return JSON.parse(value);
-        } catch (e) {
-            console.error(e);
-            return void 0;
-        }
-    }
-}
 
 
 // const kv = new KVService();
