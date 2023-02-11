@@ -1,5 +1,5 @@
 <script lang='ts'>
-	import Pin from "../../../components/Pin.svelte";
+	import Pin from "../Pin.svelte";
 </script>
 
 
