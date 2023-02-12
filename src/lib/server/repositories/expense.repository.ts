@@ -1,4 +1,4 @@
-import type { IEntity } from "../services/kv.service";
+import { KVRepository, type IEntity } from "../services/kv.service";
 
 interface Split {
     userId: string;
@@ -10,3 +10,6 @@ export interface Expense extends IEntity {
     amount: number;
     splits: Split[];
 }
+
+
+export class ExpenseRepository extends KVRepository<Expense> {}

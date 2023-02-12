@@ -5,6 +5,8 @@ dotenv.config();
 
 export interface StoredIEntity {
     id: string;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export interface IEntity {
@@ -38,9 +40,8 @@ export class KVRepository<T extends IEntity> {
 
 
     private async _create(value: T & StoredIEntity) {
-        const res = await this.kv.putRaw(value.id, JSON.stringify(
-            omit(value, ['id'])
-        ));
+        value.createdAt = new Date();
+        const res = await this.kv.put(value);
         if (!res) throw new Error('Failed to create');
         return value;
     }
@@ -49,7 +50,7 @@ export class KVRepository<T extends IEntity> {
         const entity = await this.get(value.id);
         if (!entity) throw new Error('Entity not found');
         const merged = merge(entity, value);
-        const res = await this.kv.putRaw(value.id, JSON.stringify(omit(merged, 'id')));
+        const res = await this.kv.put(merged);
         if (!res) throw new Error('Failed to update');
         return merged;
     }
@@ -68,8 +69,8 @@ export class KVRepository<T extends IEntity> {
 
 
     update(value: T & StoredIEntity): T & StoredIEntity {
-        throw new Error('Not implemented update');
-        return {} as T & StoredIEntity
+        this.pushToState(InMemoryActions.Update, value);
+        return value
     }
 
     delete(value: T & StoredIEntity): T & StoredIEntity {
@@ -84,8 +85,8 @@ export class KVRepository<T extends IEntity> {
         const value = await this.kv.getRaw(key);
         try {
             if (!value) throw new Error('Value is undefined');
-            const obj = JSON.parse(value);
-            this.pushToState(InMemoryActions.Get, { ...obj, id: key });
+            const obj = { ...JSON.parse(value), id: key } as (T & StoredIEntity);
+            this.pushToState(InMemoryActions.Get, obj);
             return obj;
         } catch (e) {
             console.error(e);
@@ -97,18 +98,26 @@ export class KVRepository<T extends IEntity> {
         const value = await this.get(key);
         if (!value) throw new Error('Value is undefined');
         const newValue = cb(value);
-        return await this._update({ ...newValue, id: key });
-        // return await this.kv.putRaw(key, JSON.stringify(newValue));
+        return await this.update({ ...newValue, id: key });
+    }
+
+    async findOrCreate(key: string, cb?: () => T): Promise<T & StoredIEntity> {
+        const value = await this.get(key);
+        if (value) return value;
+
+        const newValue = cb ? await cb() : this.create({} as T);
+        return this.create({ ...newValue, id: key });
     }
 
 
 
+
     async flush() {
-        this.state.forEach(async (values, action) => {
-            values.forEach(async (value) => {
-                this[action](value);
-            })
+        const promises$ = Array.from(this.state.entries()).map(async ([action, values]) => {
+            await Promise.all(values.map((value) => this[action](value)))
         })
+
+        await Promise.all(promises$);
 
         this.state.clear();
     }
@@ -140,6 +149,11 @@ export class KVService {
     }
 
 
+    async put(value: StoredIEntity): Promise<boolean | undefined> {
+        const key = value.id;
+        value.updatedAt = new Date();
+        return await this.putRaw(key, JSON.stringify(omit(value, 'id')))
+    }
     async putRaw(key: string, value: string): Promise<boolean | undefined> {
         const res = await fetch(this.#getURLKey(key), {
             method: 'PUT',

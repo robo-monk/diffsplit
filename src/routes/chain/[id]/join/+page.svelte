@@ -9,7 +9,7 @@
 
 	export let data: LayoutData;
 	let chain = data.chain;
-	console.log('chain', chain);
+	console.log('[chain]', chain);
 
 	// let chain = params?.chain;
 

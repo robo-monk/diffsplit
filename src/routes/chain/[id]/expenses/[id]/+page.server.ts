@@ -1,9 +1,10 @@
 import { ChainRepository, type Chain } from '$lib/server/repositories/chain.repository';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail, redirect, type Cookies } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { UserRepository } from '$lib/server/repositories/user.repository';
 import { CookieService } from '$lib/server/services/cookies.service';
-import type { LayoutData, LayoutServerData } from '../$types';
+import type { LayoutData, LayoutServerData } from '../../$types';
+import { ExpenseRepository } from '$lib/server/repositories/expense.repository';
 // import type { PageServerLoad, Actions } from './$types';
 // import { fail } from '@sveltejs/kit';
 
@@ -19,16 +20,26 @@ import type { LayoutData, LayoutServerData } from '../$types';
 //     return ret;
 // }) satisfies PageServerLoad;
 
+function dependecyInjector(params: { cookies: Cookies }) {
+    return {
+        chainRepository: new ChainRepository(),
+        userRepository: new UserRepository(),
+        cookieService: new CookieService(params.cookies),
+        expenseRepository: new ExpenseRepository()
+    }
+}
 
 export const actions = {
-    join: async ({ cookies, request, params }) => {
-        const chainRepository = new ChainRepository()
-        const userRepository = new UserRepository()
-        const cookieService = new CookieService(cookies)
+    create: async ({ cookies, request, params }) => {
+        const { chainRepository, userRepository, cookieService, expenseRepository } = dependecyInjector({ cookies })
 
         const data = await request.formData();
         const chainId = data.get('chainId');
         const username = data.get('username');
+
+        // expenseRepository.findOrCreate
+
+        params.id
 
         console.log("-> chain id is", chainId);
 
@@ -45,7 +56,6 @@ export const actions = {
                 username: username.toString(),
             });
 
-            console.log('-> store user entity', user)
             cookieService.storeEntity(user, 'user');
 
             if (!existingUser) chain.users.push(user)

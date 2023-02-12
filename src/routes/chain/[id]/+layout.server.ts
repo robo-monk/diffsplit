@@ -12,7 +12,8 @@ export const load = (async ({ cookies, params, url }) => {
 
     if (chain) cookieService.storeEntity(chain);
 
-    const user = cookieService.getEntity<User>('user');
+    const user = cookieService.getEntity('user');
+    console.debug('-> user', user)
     if (!user && url.pathname != `/chain/${params.id}/join`) throw redirect(301, `/chain/${params.id}/join`);
     // const chainService = new ChainService()
     return {

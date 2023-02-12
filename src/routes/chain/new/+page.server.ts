@@ -21,7 +21,8 @@ export const actions = {
 
     const chain = chainRepository.create({
       name: name.toString(),
-      users: []
+      users: [],
+      expenses: []
     });
 
     console.log('-> chain', chain)
