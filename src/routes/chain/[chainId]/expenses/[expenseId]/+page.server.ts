@@ -5,6 +5,7 @@ import { UserRepository } from '$lib/server/repositories/user.repository';
 import { CookieService } from '$lib/server/services/cookies.service';
 import type { LayoutData, LayoutServerData } from '../../$types';
 import { ExpenseRepository } from '$lib/server/repositories/expense.repository';
+import type { StoredIEntity } from '$lib/server/services/kv.service';
 // import type { PageServerLoad, Actions } from './$types';
 // import { fail } from '@sveltejs/kit';
 
@@ -20,7 +21,7 @@ import { ExpenseRepository } from '$lib/server/repositories/expense.repository';
 //     return ret;
 // }) satisfies PageServerLoad;
 
-function dependecyInjector(params: { cookies: Cookies }) {
+function dependencyInjector(params: { cookies: Cookies }) {
     return {
         chainRepository: new ChainRepository(),
         userRepository: new UserRepository(),
@@ -30,37 +31,22 @@ function dependecyInjector(params: { cookies: Cookies }) {
 }
 
 export const actions = {
-    create: async ({ cookies, request, params }) => {
-        const { chainRepository, userRepository, cookieService, expenseRepository } = dependecyInjector({ cookies })
+    create: async ({ cookies, request, params, locals }) => {
+        const { chainRepository, userRepository, cookieService, expenseRepository } = dependencyInjector({ cookies })
 
         const data = await request.formData();
-        const chainId = data.get('chainId');
-        const username = data.get('username');
+        const chain = locals.chain as Chain & StoredIEntity;
+        // const chainId = data.get('chainId');
 
-        // expenseRepository.findOrCreate
-
-        params.id
-
-        console.log("-> chain id is", chainId);
-
-        if (!username) return fail(400, { missing: 'username' });
-        if (!chainId) return fail(400, { missing: 'chainId' });
-
-        const updateChain = await chainRepository.mutate(chainId.toString(), (chain) => {
-            console.log("mutating chain", chain, chainId);
-            const existingUser = chain.users.find((user) => user.username === username);
-            // ASK FOR PIN
-            // if (existingUser) throw fail(400, { error: 'Username already taken' });
-
-            const user = existingUser || userRepository.create({
-                username: username.toString(),
-            });
-
-            cookieService.storeEntity(user, 'user');
-
-            if (!existingUser) chain.users.push(user)
-            return chain
+        const expense = expenseRepository.create({
+            name: data.get('name') as string,
+            amount: 0,
+            splits: [],
         })
+
+        chain.expenses.push(expense);
+        const updateChain = chainRepository.update(chain);
+
         // const chain = chainRepository.create({
         //     name: name.toString(),
         //     users: []
@@ -69,9 +55,10 @@ export const actions = {
         console.log('-> chain', updateChain)
 
         await chainRepository.flush()
+
         cookieService.storeEntity(updateChain);
 
-        throw redirect(301, `/chain/${updateChain.id}/invite`);
+        throw redirect(301, `/chain/${updateChain.id}/expenses/${expense.id}`);
         return { success: true, updateChain };
     }
 } satisfies Actions;

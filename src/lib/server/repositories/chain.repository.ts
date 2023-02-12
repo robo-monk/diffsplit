@@ -5,7 +5,7 @@ import type { User } from "./user.repository";
 export interface Chain extends IEntity {
     name: string;
     users: (User & StoredIEntity)[]
-    expenses: Expense[]
+    expenses: (Expense & StoredIEntity)[]
 }
 
 export class ChainRepository extends KVRepository<Chain> {}
