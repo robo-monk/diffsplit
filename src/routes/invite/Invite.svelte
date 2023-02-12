@@ -3,6 +3,8 @@
 	import Add from "carbon-icons-svelte/lib/Add.svelte";
 	import Link from "carbon-icons-svelte/lib/Link.svelte";
 	import Share from "carbon-icons-svelte/lib/Share.svelte";
+	import ArrowRight from "carbon-icons-svelte/lib/ArrowRight.svelte";
+
 
 
 
@@ -75,6 +77,10 @@
 		<Button kind="secondary" on:click={shareURL}>
 			<span>Share URL</span>
 			<Share class="absolute right-5"/>
+		</Button>
+		<Button class="mt-20 relative" on:click={copyURL}>
+			<span>Continue</span>
+			<ArrowRight class="absolute right-5"/>
 		</Button>
 	</div>
 
