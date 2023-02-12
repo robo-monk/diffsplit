@@ -8,7 +8,7 @@ export class CookieService {
 
     storeEntity<T extends StoredIEntity>(entity: (T & StoredIEntity), key: string = entity.id) {
         this.cookies.set(key, JSON.stringify(entity), {
-            // path: '/',
+            path: '/',
             httpOnly: true,
             secure: !dev,
         });

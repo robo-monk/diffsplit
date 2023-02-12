@@ -82,10 +82,11 @@ export class KVRepository<T extends IEntity> {
         const inMemory = this.state.get(InMemoryActions.Get)?.find(v => v.id === key);
         if (inMemory) return inMemory;
 
-        const value = await this.kv.getRaw(key);
+        const value = await this.kv.get(key);
+        if (!value) return void 0;
         try {
-            if (!value) throw new Error('Value is undefined');
-            const obj = { ...JSON.parse(value), id: key } as (T & StoredIEntity);
+            // if (!value) throw new Error('Value is undefined');
+            const obj = { ...value, id: key } as (T & StoredIEntity);
             this.pushToState(InMemoryActions.Get, obj);
             return obj;
         } catch (e) {
@@ -98,7 +99,7 @@ export class KVRepository<T extends IEntity> {
         const value = await this.get(key);
         if (!value) throw new Error('Value is undefined');
         const newValue = cb(value);
-        return await this.update({ ...newValue, id: key });
+        return this.update({ ...newValue, id: key });
     }
 
     async findOrCreate(key: string, cb?: () => T): Promise<T & StoredIEntity> {
@@ -108,9 +109,6 @@ export class KVRepository<T extends IEntity> {
         const newValue = cb ? await cb() : this.create({} as T);
         return this.create({ ...newValue, id: key });
     }
-
-
-
 
     async flush() {
         const promises$ = Array.from(this.state.entries()).map(async ([action, values]) => {
@@ -145,7 +143,17 @@ export class KVService {
             return void 0
         })
         return await res?.text()
-        // return res?.json();
+    }
+
+    async get<T extends StoredIEntity>(key: string): Promise<T | undefined> {
+        try {
+            const response = JSON.parse(await this.getRaw(key) || 'null') as T;
+            // @ts-ignore
+            if (response?.errors && response.errors.length > 0) return void 0;
+            return response
+        } catch (e) {
+            return void 0;
+        }
     }
 
 

@@ -24,7 +24,7 @@
 
 		<h1>{chain.name}</h1>
 		<div class="mt-5">
-			<form method="POST" action="?/join">
+			<form method="POST" action="?/create">
 				<input type="hidden" name="chainId" value={chain.id} />
 				<!-- <Input name="name" placeholder="Name" /> -->
 				<TextInput

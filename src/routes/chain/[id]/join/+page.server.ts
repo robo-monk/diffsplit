@@ -35,6 +35,7 @@ export const actions = {
         if (!username) return fail(400, { missing: 'username' });
         if (!chainId) return fail(400, { missing: 'chainId' });
 
+        console.log('mutating chain', chainId)
         const updateChain = await chainRepository.mutate(chainId.toString(), (chain) => {
             console.log("mutating chain", chain, chainId);
             const existingUser = chain.users.find((user) => user.username === username);
