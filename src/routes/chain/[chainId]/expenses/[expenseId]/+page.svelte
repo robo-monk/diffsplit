@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button, Tag, TextInput } from 'carbon-components-svelte';
 	import type { LayoutData } from '../../$types';
+	import Amount from '../../../Amount.svelte';
 
 	export let data: LayoutData;
 	let { chain, user, expense } = data;
@@ -19,33 +20,24 @@
 </script>
 
 {#if expense}
-	<h1>{expense?.name || 'New'}</h1>
+	<h1>{expense?.name}</h1>
+	<h1>Total</h1>
+	<Amount amount={expense?.total || 0} />
 	<div class="mt-5">
 		<form method="POST" action="?/create">
 			<!-- <input type="hidden" name="chainId" value={chain.id} /> -->
 			<!-- <Input name="name" placeholder="Name" /> -->
-			<TextInput
-				labelText="Expense name"
-				placeholder="Koffie"
-				name="name"
-				bind:value={name}
-			/>
+			<TextInput labelText="Expense name" placeholder="Koffie" name="name" bind:value={name} />
 			<Button type="submit" {disabled}>Set amount</Button>
 		</form>
 	</div>
-
 {:else}
-	<h1>'New'</h1>
+	<h1>New</h1>
 	<div class="mt-5">
 		<form method="POST" action="?/create">
 			<!-- <input type="hidden" name="chainId" value={chain.id} /> -->
 			<!-- <Input name="name" placeholder="Name" /> -->
-			<TextInput
-				labelText="Expense name"
-				placeholder="Koffie"
-				name="name"
-				bind:value={name}
-			/>
+			<TextInput labelText="Expense name" placeholder="Koffie" name="name" bind:value={name} />
 			<Button type="submit" {disabled}>Set amount</Button>
 		</form>
 	</div>

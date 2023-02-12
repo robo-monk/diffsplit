@@ -3,3 +3,5 @@
     export let amount: number;
     export let currency: string = '€';
 </script>
+
+<h1>{amount} {currency}</h1>

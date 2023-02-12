@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button, Tag } from 'carbon-components-svelte';
 	import type { LayoutData } from './$types';
+	import ExpenseRow from './expenses/ExpenseRow.svelte';
 
 	export let data: LayoutData;
 	let chain = data.chain;
@@ -13,6 +14,13 @@
 	<div class="mt-5">
 		{#each chain.users as user}
 			<Tag type="green">{user.username}</Tag>
+		{/each}
+
+		{#each chain.expenses as expense}
+			<div class="my-5">
+				<ExpenseRow {expense} />
+
+			</div>
 		{/each}
 
 		<div />

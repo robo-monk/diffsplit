@@ -14,6 +14,11 @@ function dependencyInjector(params: { cookies: Cookies }) {
     }
 }
 
+function redirectIf(url: URL, condition: boolean, to: string) {
+    // console.log('-> redirectIf', url.pathname, condition, to)
+    if (condition && url.pathname != to) throw redirect(303, to);
+}
+
 export const handle = (async ({ event, resolve }) => {
     const {
         chainRepository,
@@ -34,13 +39,15 @@ export const handle = (async ({ event, resolve }) => {
 
 
     if (chain) cookieService.storeEntity(chain)
-    if (user) cookieService.storeEntity(user)
+    if (user) cookieService.storeEntity(user);
 
-    if (!user && event.url.pathname != `/chain/${event.params.chainId}/join`) throw redirect(301, `/chain/${event.params.chainId}/join`);
+    redirectIf(event.url, !chain && !event.url.pathname.includes('/chain/new'), `/`)
+    redirectIf(event.url, !!(chain && !user), `/chain/${event.params.chainId}/join`)
+
 
     event.locals = {
         ...event.locals,
-        user, chain , expense,
+        user, chain, expense,
     }
 
     const response = await resolve(event);
