@@ -1,5 +1,11 @@
 <script lang='ts'>
 	import { Button } from 'carbon-components-svelte';
+	import Add from "carbon-icons-svelte/lib/Add.svelte";
+	import Link from "carbon-icons-svelte/lib/Link.svelte";
+	import Share from "carbon-icons-svelte/lib/Share.svelte";
+
+
+
 
 	import QRCode from 'qrcode'
 
@@ -54,16 +60,22 @@
 
 </script>
 
-<div class="flex items-center flex-col max-w-lg mx-auto">
+<div class="flex items-center flex-col max-w-lg">
 
 	<div class="qrcode">
 		<!-- svelte-ignore a11y-missing-attribute -->
 		<img src='' bind:this={qrimage}>
 	</div>
 	
-	<div class="flex flex-col">
-		<Button class="my-5" on:click={copyURL}>Copy URL</Button>
-		<Button kind="secondary" on:click={shareURL}>Share</Button>
+	<div class="flex flex-col w-3/5">
+		<Button class="my-5 relative" on:click={copyURL}>
+			<span>Copy URL</span>
+			<Link class="absolute right-5"/>
+		</Button>
+		<Button kind="secondary" on:click={shareURL}>
+			<span>Share URL</span>
+			<Share class="absolute right-5"/>
+		</Button>
 	</div>
 
 </div>
