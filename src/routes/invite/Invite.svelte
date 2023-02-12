@@ -18,7 +18,22 @@
 		} catch (err) {
 			console.error(err)
 		}
-	}	
+	}
+
+	async function copyURL(){
+
+		try {
+			if (!navigator.clipboard) {
+				throw new Error("Browser don't have support for native clipboard.");
+			}
+
+			await navigator.clipboard.writeText(url);
+			console.log("Copied URL: " + url);
+		} catch (error) {
+			console.log("Could not copy, clipboard issue");
+			}
+		return url
+	}
 
 	generateQR(url)
 
@@ -32,7 +47,7 @@
 	</div>
 	
 	<div class="flex flex-col">
-		<Button class="my-5">Copy URL</Button>
+		<Button class="my-5" on:click={copyURL}>Copy URL</Button>
 		<Button kind="secondary">Share</Button>
 	</div>
 
