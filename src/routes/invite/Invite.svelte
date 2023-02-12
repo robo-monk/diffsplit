@@ -31,8 +31,23 @@
 			console.log("Copied URL: " + url);
 		} catch (error) {
 			console.log("Could not copy, clipboard issue");
-			}
+		}
 		return url
+	}
+
+	async function shareURL() {
+		const shareData = {
+			title: 'Invitation to join Diffsplit room',
+			text: "Your friend is inviting you to join Diffsplit",
+			url: url
+		}
+
+		try {
+			await navigator.share(shareData);
+			console.log("Shared url data to navigator")
+		} catch (err) {
+			console.log("Did not share url data. Error:" + err)
+		}
 	}
 
 	generateQR(url)
@@ -48,7 +63,7 @@
 	
 	<div class="flex flex-col">
 		<Button class="my-5" on:click={copyURL}>Copy URL</Button>
-		<Button kind="secondary">Share</Button>
+		<Button kind="secondary" on:click={shareURL}>Share</Button>
 	</div>
 
 </div>
